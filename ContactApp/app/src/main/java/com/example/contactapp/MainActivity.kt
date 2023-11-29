@@ -1,62 +1,56 @@
 package com.example.contactapp
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.core.view.WindowCompat
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
+import androidx.navigation.ui.setupActionBarWithNavController
+import android.view.Menu
+import android.view.MenuItem
 import com.example.contactapp.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(){
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private lateinit var listItem : ArrayList<Contact>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater) // tạo đối tượng cho viewbinding của layout
-        setContentView(binding.root) // xét layout cho activity
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
 
-        listItem = ArrayList()
-        for (n in 1..20){
-            var item : Contact = Contact(n, "Nguyen Son Tung $n", "0312345678", "sontung@gmail.com")
-            listItem.add(item)
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        appBarConfiguration = AppBarConfiguration(navController.graph)
+        setupActionBarWithNavController(navController, appBarConfiguration)
+
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_settings -> {
+                val navController = findNavController(R.id.nav_host_fragment_content_main)
+                navController.navigate(R.id.action_FirstFragment_to_createFragment)
+                return true
+            }
         }
-        binding.rcv.layoutManager = LinearLayoutManager(this) // xét hiển thị rcv theo chiều dọc
-        var adapter: ItemAdapter = ItemAdapter(listItem, this, object : ItemAdapter.ClickContactListener{
-            override fun clickLn(id: Int) {
-                var contact = listItem.get(id);
-                var i : Intent = Intent(this@MainActivity, DetailActivity::class.java) // chuyển sang actvity Detail
-                i.putExtra("id", contact.id)
-                i.putExtra("name", contact.name)
-                i.putExtra("phone", contact.phone)
-                i.putExtra("email", contact.email)
-                startActivity(i)
-            }
+        return super.onOptionsItemSelected(item)
+    }
 
-            override fun onItemLongClick(contact: Contact, view: View) { // xét sự kiện giữ
-                val popupMenu = PopupMenu(this@MainActivity, view)
-                popupMenu.inflate(R.menu.menu) // Chỉ định menu resource
-                popupMenu.setOnMenuItemClickListener { menuItem ->
-                    when (menuItem.itemId) {
-                        R.id.menu_action_1 -> {
-                            true
-                        }
-                        R.id.menu_action_2 -> {
-                            true
-                        }
-                        R.id.menu_action_3 -> {
-                            true
-                        }
-                        else -> false
-                    }
-                }
-                popupMenu.show()
-            }
-
-        }) //
-        binding.rcv.adapter = adapter // xet adapter cho recycleView
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        return navController.navigateUp(appBarConfiguration)
+                || super.onSupportNavigateUp()
     }
 }
